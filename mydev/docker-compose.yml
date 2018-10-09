@@ -1,0 +1,87 @@
+version: "3"
+
+services:
+  frontend:
+    #build: ./node_centos
+    image: node_centos:v1.1
+    ports:
+      - "${FRONTEND_APP_PORT}:3000"
+      - "${FRONTEND_SSH_PORT}:22"
+    volumes:
+      - "$FRONTEND_APP_PATH:/data/nodejs/$FRONTEND_PROJECT_NAME"
+      - "$SSH_AUTHORIZED_KEYS_PATH:/root/.ssh/authorized_keys"
+    depends_on:
+      - backend
+    networks:
+      - frontend
+      - backend
+    working_dir: /data/nodejs/$FRONTEND_PROJECT_NAME
+
+  backend:
+    #build: ./beego_centos
+    image: beego_centos:v1.1
+    expose:
+      - "8080"
+    ports:
+      - "${BACKEND_APP_PORT}:8080"
+      - "${BACKEND_SSH_PORT}:22"
+    depends_on:
+      - db
+    networks:
+      - backend
+      - db
+    volumes:
+      - "$BACKEND_APP_PATH:/data/go/src/$BACKEND_PROJECT_NAME"
+      - "$SSH_AUTHORIZED_KEYS_PATH:/root/.ssh/authorized_keys"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    # cant's scale
+    container_name: phpmyadmin
+    ports:
+      - "${PHPMYADMIN_PORT}:80"
+    depends_on:
+      - db
+    networks:
+      - manage
+      - db
+    restart: always
+
+  db:
+    image: mysql:${MYSQL_VERSION}
+    # cant's scale
+    container_name: db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      #MYSQL_USER: ${MYSQL_USER}
+      #MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - "${MYSQL_SAVE_PATH}:/var/lib/mysql"
+    expose:
+      - "3306"
+    ports:
+      - "${MYSQL_PORT}:3306"
+    networks:
+      - db
+
+  gitlab:
+    image: gitlab/gitlab-ce
+    container_name: gitlab
+    volumes:
+      - "${GITLAB_SAVE_PATH}/logs:/var/log/gitlab"
+      - "${GITLAB_SAVE_PATH}/config:/etc/gitlab"
+      - "${GITLAB_SAVE_PATH}/data:/var/opt/gitlab"
+    ports:
+      - "${GITLAB_WEB_PORT}:80"
+      - "${GITLAB_SSH_PORT}:22"
+    networks:
+      - gitlab
+
+networks:
+  frontend:
+  backend:
+  manage:
+  db:
+  gitlab:
+

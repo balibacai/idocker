@@ -2,8 +2,8 @@ version: "3"
 
 services:
   frontend:
-    #build: ./node_centos
-    image: node_centos:v1.1
+    build: ./node_centos
+    # image: node_centos:v1.1
     ports:
       - "${FRONTEND_APP_PORT}:3000"
       - "${FRONTEND_SSH_PORT}:22"
@@ -18,8 +18,12 @@ services:
     working_dir: /data/nodejs/$FRONTEND_PROJECT_NAME
 
   backend:
-    #build: ./beego_centos
-    image: beego_centos:v1.1
+    build: ./beego_centos
+    # image: beego_centos:v1.1
+    environment:
+      MYSQL_USERNAME: ${BACKEND_MYSQL_USERNAME}
+      MYSQL_PASSWORD: ${BACKEND_MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${BACKEND_MYSQL_DATABASE}
     expose:
       - "8080"
     ports:

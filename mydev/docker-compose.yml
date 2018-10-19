@@ -83,7 +83,7 @@ services:
       - gitlab
 
   grpc_client:
-    build: ./go_centos
+    build: ./go_grpc_centos
     ports:
       - "${GRPC_CLIENT_APP_PORT}:8080"
       - "${GRPC_CLIENT_SSH_PORT}:22"
@@ -97,7 +97,7 @@ services:
       - grpc_server
 
   grpc_server:
-    build: ./go_centos
+    build: ./go_grpc_centos
     expose:
       - "8080"
     ports:
